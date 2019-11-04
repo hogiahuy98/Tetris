@@ -1,0 +1,13 @@
+#tetris{
+    border: 2px solid silver;
+    display: block;
+}
+#gameover{
+    font-size: 24px;
+    margin-left: 600px;
+    visibility: visible;
+    float: right;
+    display: block;
+    position: absolute;
+}
+html, body {margin-left: 50px; height: 100%; overflow: hidden;}
