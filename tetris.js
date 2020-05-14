@@ -2,7 +2,7 @@ const canvas  = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 const width   = canvas.width;
 const height  = canvas.height;
-const sqsize  = 35;
+const sqsize  = 30;
 const numrow  = height / sqsize;
 const numcol  = width  / sqsize;
 const bricks_list = [L,I,T,J,O,S,Z];
@@ -10,11 +10,23 @@ const bricks_list = [L,I,T,J,O,S,Z];
 
 
 var board = []
-for (let i = 0; i < numcol; i++){
-    board.push([]);
-    for (let j = 0; j < numrow; j++)
-        board[i].push(0);
+
+
+function createBoard(){
+    for (let i = 0; i < numcol; i++){
+        board.push([]);
+        for (let j = 0; j < numrow; j++)
+            board[i].push(0);
+    }
 }
+
+function resetBoard(){
+    for (let i = 0; i < numcol; i++){
+        for (let j = 0; j < numrow; j++)
+            board[i][j] = 0;
+    }
+}
+
 function drawGrid() {
     for(var i = 0; i < numcol; i++){
         context.moveTo(i * sqsize, 0);
@@ -26,7 +38,10 @@ function drawGrid() {
     }
     context.stroke()
 }
+
+
 function updateBoard(now){
+
     for(let r = now; r > 0; r--){
         for(let c = 0; c < numcol; c++){
             if(board[c][r]==1){
@@ -36,26 +51,36 @@ function updateBoard(now){
         }
     }
 }
+
+
 function drawSquare(x, y){
+
     context.fillStyle = "black";
     context.fillRect(sqsize*x+1, sqsize*y+1, sqsize-2, sqsize-2);
 }
 
+
 function unDrawSquare(x, y){
+
     context.fillStyle = "white";
     context.fillRect(sqsize * x + 1, sqsize * y + 1, sqsize - 2, sqsize - 2)
 }
 
-function DroppingBrick(brickshape){
-    this.brick_shape = brickshape;
+
+function Brick(){
+    this.speed = 750;
+    this.run;
+    this.brick_shape = bricks_list[Math.floor(Math.random() * 7)];
     this.brick_state = 0;
     this.brick       = this.brick_shape[this.brick_state];
     this.x = 3;
     this.y = -2;
+    this.ispause = true;
+    this.count_deleted_line = 0;
 }
 
-DroppingBrick.prototype.drawBrick = function (){
 
+Brick.prototype.drawBrick = function (){
     for (var Y = 0; Y < this.brick.length; Y++)
         for (var X = 0; X < this.brick.length; X++) if (this.brick[Y][X] == 1)
         
@@ -63,8 +88,8 @@ DroppingBrick.prototype.drawBrick = function (){
 //end function
 }
 
-DroppingBrick.prototype.unDrawBrick = function (){
 
+Brick.prototype.unDrawBrick = function (){
     for(var Y = 0; Y < this.brick.length; Y++)
         for(var X = 0; X < this.brick.length; X++) if(this.brick[Y][X] == 1)
             
@@ -72,8 +97,8 @@ DroppingBrick.prototype.unDrawBrick = function (){
 //end function
 }
 
-DroppingBrick.prototype.checkMovable = function(X, Y, new_brick){
 
+Brick.prototype.checkMovable = function(X, Y, new_brick){
     for (let row = 0; row < this.brick.length; row++){
         for (let col = 0; col < this.brick.length; col++){
 
@@ -92,8 +117,8 @@ DroppingBrick.prototype.checkMovable = function(X, Y, new_brick){
     return true;
 }
 
-DroppingBrick.prototype.lockBrick = function(){
 
+Brick.prototype.lockBrick = function(){
     for (var row = 0; row < this.brick.length; row++){
         for (var col = 0; col < this.brick.length; col++){
             if(this.brick[row][col] == 1)
@@ -101,21 +126,26 @@ DroppingBrick.prototype.lockBrick = function(){
         }
     }
     if(this.checkGameOver()){
-        clearInterval(game);
+        clearInterval(this.run);
         document.getElementById('gameover').style.visibility="visible";
+        document.getElementById('play_again').style.visibility="visible";
+        document.getElementById("pause_button").style.visibility = "hidden";
+
     }
     this.deleteFullRow();
     this.newBrick();
 }
 
-DroppingBrick.prototype.checkGameOver = function(){
+
+Brick.prototype.checkGameOver = function(){
+
     for(c = 0; c < numcol; c++)
         if(board[c][0] == 1)
             return true;
 }
 
 
-DroppingBrick.prototype.newBrick = function(){
+Brick.prototype.newBrick = function(){
 
     let new_brick_index = Math.floor(Math.random() * 7);
     this.x = 4;
@@ -125,19 +155,19 @@ DroppingBrick.prototype.newBrick = function(){
     this.brick = this.brick_shape[this.brick_state];
 }
 
-DroppingBrick.prototype.deleteFullRow = function(){
-    
+
+Brick.prototype.deleteFullRow = function(){  
+    var line_count = 0;
     for(let r = numrow - 1; r > 0; r--){
-        var isFull = true;
-        
-        for (let c = 0; c < numcol; c++){
+        var isFull = true;        
+        for (let c = 0; c < numcol; c++){          
             if(board[c][r] == 0){
                 isFull = false;
                 break;
             }
-        }
-        
+        }       
         if(isFull){
+            line_count++;
             for(let r1 = r; r1 > 1; r1--)
                 for (let c = 0; c < numcol; c++){   
 
@@ -147,9 +177,34 @@ DroppingBrick.prototype.deleteFullRow = function(){
         }
         updateBoard(r);
     }
+    if(line_count!=0){
+        this.updateScore(line_count);
+        this.count_deleted_line += line_count;
+        if(this.count_deleted_line > 5 && this.speed > 250){
+            this.increaseSpeed();
+            this.count_deleted_line = 0;
+        }
+    }
 }
 
-DroppingBrick.prototype.moveDown = function (){
+
+Brick.prototype.updateScore = function(line){
+    score = Math.pow(line, 2);
+    document.getElementById('score').innerHTML = parseInt(document.getElementById('score').textContent) + score;
+}
+
+
+Brick.prototype.quickDrop = function(){
+    this.unDrawBrick();
+    while(this.checkMovable(0, 1, this.brick)){
+        this.y++;
+    }
+    this.drawBrick();
+    this.lockBrick();
+}
+
+
+Brick.prototype.moveDown = function (){
     if(this.checkMovable(0, 1,this.brick)){
         this.unDrawBrick();
         this.y++;
@@ -160,7 +215,8 @@ DroppingBrick.prototype.moveDown = function (){
     }
 }
 
-DroppingBrick.prototype.moveLeft = function(){
+
+Brick.prototype.moveLeft = function(){
     if(this.checkMovable(-1,0,this.brick)){
         this.unDrawBrick();
         this.x--;
@@ -168,7 +224,9 @@ DroppingBrick.prototype.moveLeft = function(){
     }
 }
 
-DroppingBrick.prototype.moveRight = function(){
+
+Brick.prototype.moveRight = function(){
+
     if(this.checkMovable(1,0,this.brick)){
         this.unDrawBrick();
         this.x++;
@@ -176,7 +234,8 @@ DroppingBrick.prototype.moveRight = function(){
     }
 }
 
-DroppingBrick.prototype.rolate = function(){
+
+Brick.prototype.rolate = function(){
     let new_state = (this.brick_state + 1) % this.brick_shape.length;
     if (this.checkMovable(0, 0, this.brick_shape[new_state])){
         this.unDrawBrick();
@@ -187,14 +246,59 @@ DroppingBrick.prototype.rolate = function(){
 }
 
 
+Brick.prototype.runGame = function(){
+    this.ispause = false;
+    this.run = setInterval(function(){brick.moveDown()}, this.speed);
+    document.getElementById("pause_button").style.visibility = "visible";
+}
+
+
+Brick.prototype.increaseSpeed = function(){
+    clearInterval(this.run);
+    this.speed = this.speed - 25;
+    this.runGame();
+}
+
+
+Brick.prototype.pauseGame = function(){
+    clearInterval(this.run);
+    document.getElementById("pause_button").style.visibility = "hidden";
+    document.getElementById("resume_button").style.visibility = "visible";
+    this.ispause = true;
+}
+
+
+Brick.prototype.resumeGame = function(){
+    this.runGame();
+    document.getElementById("pause_button").style.visibility = "visible";
+    document.getElementById("resume_button").style.visibility = "hidden";
+    this.ispause = false;
+}
+
+
 drawGrid();
-var brick = new DroppingBrick(L);
-brick.drawBrick();
-var game = setInterval(function(){brick.moveDown()}, 500);
+var brick = new Brick();
+document.getElementById("start_button").style.visibility = "visible";
+
+function startGame() {
+    createBoard();
+    brick.drawBrick();
+    brick.runGame();
+    document.getElementById("start_button").style.visibility = "hidden";
+    document.getElementById("score").style.visibility = "visible";
+    document.getElementById("your_score").style.visibility = "visible";
+}
+
+function playAgain(){
+    location.reload();
+}
 
 document.addEventListener('keyup', (k) => {
-    if      (k.code === 'ArrowDown')  brick.moveDown() ;
-    else if (k.code === 'ArrowLeft')  brick.moveLeft() ;
-    else if (k.code === 'ArrowRight') brick.moveRight();
-    else if (k.code === 'ArrowUp')    brick.rolate()   ;
+    if(!brick.ispause){
+        if      (k.code === 'ArrowDown')  brick.moveDown() ;
+        else if (k.code === 'ArrowLeft')  brick.moveLeft() ;
+        else if (k.code === 'ArrowRight') brick.moveRight();
+        else if (k.code === 'ArrowUp')    brick.rolate()   ;
+        else if (k.code === 'Space')      brick.quickDrop();
+    }
 });

@@ -1,13 +1,86 @@
 #tetris{
     border: 2px solid silver;
     display: block;
+    position: absolute;
+    margin-left: 40px;
+    margin-right: 40px;
 }
+
 #gameover{
-    font-size: 24px;
-    margin-left: 600px;
-    visibility: visible;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 50px;
+    margin-left: 400px;
+    margin-top: 200px; 
     float: right;
     display: block;
     position: absolute;
+    visibility: hidden;
+}
+#start_button{
+    margin-left: 400px;
+    margin-top: 250px; 
+    font-family: sans-serif;
+    font-size: 35px;
+    position: absolute;
+    border: 2px solid black;
+    color: white;
+    background-color: black;
+    cursor: pointer;
+}
+
+#pause_button{
+    margin-left: 400px;
+    margin-top: 250px; 
+    font-family: sans-serif;
+    font-size: 23px;
+    position: absolute;
+    border: 2px solid black;
+    color: black;
+    background-color: white;
+    cursor: pointer;
+    visibility: hidden;
+}
+
+#resume_button{
+    margin-left: 430px;
+    margin-top: 250px; 
+    font-family: sans-serif;
+    font-size: 23px;
+    position: absolute;
+    border: 2px solid black;
+    color: black;
+    background-color: white;
+    cursor: pointer;
+    visibility: hidden;   
+}
+
+#play_again{
+    margin-left: 430px;
+    margin-top: 250px; 
+    font-family: sans-serif;
+    font-size: 23px;
+    position: absolute;
+    border: 2px solid black;
+    color: black;
+    background-color: white;
+    cursor: pointer;
+    visibility: hidden;   
+}
+
+#score{
+    margin-left: 500px;
+    margin-top: 150px; 
+    font-family: sans-serif;
+    font-size: 35px;
+    position: absolute;
+    visibility: hidden;
+}
+#your_score{
+    margin-left: 400px;
+    margin-top: 115px; 
+    font-family: sans-serif;
+    font-size: 35px;
+    position: absolute;
+    visibility: hidden;
 }
 html, body {margin-left: 50px; height: 100%; overflow: hidden;}

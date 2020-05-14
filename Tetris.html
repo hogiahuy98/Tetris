@@ -9,8 +9,14 @@
 </head>
 <body>
     <div id='a'>
-        <canvas id='tetris' width="350" height="630"></canvas>
+        <canvas id='tetris' width="300" height="540"></canvas>
         <div id='gameover'>GAME OVER</div>
+        <p id='score'>0</p>
+        <p id='your_score'>Your score</p>
+        <button id='start_button' onclick='startGame()'>Start Game</button>
+        <button id='pause_button' onclick='brick.pauseGame()'>Pause game</button>
+        <button id='resume_button' onclick='brick.resumeGame()'>Resume</button>
+        <button id='play_again' onclick='playAgain()'>Play Again</button>
     </div>
     <script src="bricks.js"></script>
     <script src="tetris.js"></script>
